@@ -1,0 +1,27 @@
+{
+  "name": "coinmarketcap-extended-api",
+  "version": "0.1.0",
+  "description": "Unofficial CoinMarketCap.com API augmented with website functionality",
+  "main": "client/index.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lleaff/coinmarketcap-extended-api.git"
+  },
+  "keywords": [
+    "coinmarketcap",
+    "cryptocurrency"
+  ],
+  "author": "lleaff",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lleaff/coinmarketcap-extended-api/issues"
+  },
+  "homepage": "https://github.com/lleaff/coinmarketcap-extended-api#readme",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "request": "^2.83.0",
+    "request-promise-native": "^1.0.5"
+  }
+}
