@@ -4,6 +4,11 @@
   "description": "Unofficial CoinMarketCap.com API augmented with website functionality",
   "main": "client/index.js",
   "scripts": {
+    "start": "npm run build:watch",
+    "build": "babel client/ -d dist/",
+    "build:watch": "babel --watch client/ -d dist/",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "repository": {
     "type": "git",
@@ -20,8 +25,17 @@
   },
   "homepage": "https://github.com/lleaff/coinmarketcap-extended-api#readme",
   "dependencies": {
+    "bignumber.js": "^6.0.0",
     "cheerio": "^1.0.0-rc.2",
+    "lodash": "^4.17.5",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "jest": "^22.0.6"
   }
 }

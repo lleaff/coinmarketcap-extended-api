@@ -17,6 +17,11 @@ import CoinMarketCap from 'coinmarketcap-extended-api'
 const CMC = new CoinMarketCap()
 
 CMC.getMarketsFromTicker('ETH')
+  .then(markets => {
+    for (const market of markets) {
+      console.log(`ETH trades at ${market.priceUsd} USD on ${market.exchange}.`)
+    }
+  })
 ```
 
 ## API
@@ -26,7 +31,7 @@ CMC.getMarketsFromTicker('ETH')
 * **`new CoinMarketCap([options]): APIInstance`**  
   * `options`: Object with any of the below properties:  
     * `cache`: Can be used to override the default in-JS heap cache.  
-                Must be an object with `has`, `get` and `set` methods.  
+                Must be an obwith `has`, `get` and `set` methods.  
 
       The default cache is managed automatically (invalidated after 6 hours by default), and can also be refreshed manually by calling `refreshCache`.
 
@@ -35,11 +40,21 @@ CMC.getMarketsFromTicker('ETH')
 
 * **`idFromTicker(ticker): id`**  
 
-* **`getMarkets(id): [Market]`**  
+* **`coins(): [Asset]`**  
 
-* **`getMarketsFromTicker(ticker): [Market]`**  
+* **`coin(id): Asset`**  
 
 * **`coinFromTicker(ticker): Asset`**  
+
+* **`coinsFromTicker(ticker): Asset`**  
+
+* **`getMarkets(id): [Market]`**  
+1aw
+* **`getMarketsFromTicker(ticker): [Market]`**  
+
+* **`getLinks(id): [Link]`**  
+
+* **`getLinksFromTicker(ticker): [Link]`**  
 
 ### Instance properties:
 
@@ -59,16 +74,16 @@ CMC.getMarketsFromTicker('ETH')
   * **`name`**: `string`
   * **`symbol`**: `string`
   * **`rank`**: `int`
-  * **`priceUsd`**: `float` (USD)
-  * **`priceBtc`**: `float` (BTC)
-  * **`volumeUsd24h`**: `float` (USD)
-  * **`marketCapUsd`**: `float` (USD)
-  * **`availableSupply`**: `float` (tokens)
-  * **`totalSupply`**: `float` (tokens)
-  * **`maxSupply`**: `float?` (tokens)
-  * **`percentChange1h`**: `float?`
-  * **`percentChange24h`**: `float?`
-  * **`percentChange7d`**: `float?`
+  * **`priceUsd`**: `BigNumber?` (USD)
+  * **`priceBtc`**: `BigNumber?` (BTC)
+  * **`volumeUsd24h`**: `BigNumber?` (USD)
+  * **`marketCapUsd`**: `BigNumber?` (USD)
+  * **`availableSupply`**: `BigNumber?` (tokens)
+  * **`totalSupply`**: `BigNumber?` (tokens)
+  * **`maxSupply`**: `BigNumber?` (tokens)
+  * **`percentChange1h`**: `BigNumber?`
+  * **`percentChange24h`**: `BigNumber?`
+  * **`percentChange7d`**: `BigNumber?`
   * **`lastUpdated`**: `int` (seconds): UNIX time.
 
 * **`Market`**: Information related to a particular trading pair.
@@ -76,6 +91,10 @@ CMC.getMarketsFromTicker('ETH')
   * **`base`**: `ticker`: Name of the base currency.
   * **`quote`**: `ticker`: Name of the traded asset.
   * **`url`**: `string`: URL to trading pair on exchange.
-  * **`volumeUsd24h`**: `float` (USD)
-  * **`priceUsd`**: `float` (USD)
-  * **`volumePercent`**: `float`: Percent of market 24h volume on global quote trading 24h volume.
+  * **`volumeUsd24h`**: `BigNumber` (USD)
+  * **`priceUsd`**: `BigNumber` (USD)
+  * **`volumePercent`**: `BigNumber`: Percent of market 24h volume on global quote trading 24h volume.
+
+* **`Link`**: Links related to the asset.
+  * **`label`**: `string` Resource label
+  * **`url`**: `string`: Resource URL
