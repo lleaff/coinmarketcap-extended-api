@@ -5,9 +5,12 @@ const isInt = n => n - Math.floor(n) === 0
 
 const nullable = fn => (a, ...args) => a === null || fn(a, ...args)
 
+const isTicker = ticker => ticker.match(/^[A-Za-z0-9@$]+$/)
+const isNullableBigNumber = n => nullable(n => n instanceof BigNumber)
+
 const AssetValidators = {
   id: id => id.match(/^[a-z0-9-]+$/),
-  ticker: ticker => ticker.match(/^[A-Za-z0-9@$]+$/),
+  ticker: ticker => isTicker(ticker),
   rank: rank => isInt(rank),
   priceUsd: nullable(price => price instanceof BigNumber),
   priceBtc: nullable(price => price instanceof BigNumber),
@@ -20,6 +23,14 @@ const AssetValidators = {
   percentChange24h: nullable(price => price instanceof BigNumber),
   percentChange7d: nullable(price => price instanceof BigNumber),
   lastUpdated: lastUpdated => isNaN(lastUpdated) || (typeof lastUpdated === 'number' && lastUpdated > 0),
+}
+
+const MarketValidators = {
+  pair: pair => pair.split('/').every(isTicker),
+  volumeUsd: nullable(volume => volume instanceof BigNumber),
+  priceUsd: nullable(price => price instanceof BigNumber),
+  volumePercent: nullable(volume => volume instanceof BigNumber),
+  url: url => typeof url === 'string',
 }
 
 const matchValidators = (received, argument) => {
@@ -50,7 +61,11 @@ expect.extend({
 
   toBeAsset(received) {
     return matchValidators(received, AssetValidators)
-  }
+  },
+
+  toBeMarket(received) {
+    return matchValidators(received, MarketValidators)
+  },
 })
 
 /*
@@ -151,13 +166,19 @@ const apiTests = async (CMC) => {
 
   describe('getMarkets', async () => {
     it('Returns a list of Markets for a given ID', async () => {
-
+      const markets = await CMC.getMarkets('bitcoin')
+      for (const market of markets) {
+        expect(market).toBeMarket()
+      }
     })
   })
 
   describe('getMarketsFromTicker', async () => {
     it('Returns a list of Markets for a given ticker', async () => {
-
+      const markets = await CMC.getMarketsFromTicker('BTC')
+      for (const market of markets) {
+        expect(market).toBeMarket()
+      }
     })
   })
 }

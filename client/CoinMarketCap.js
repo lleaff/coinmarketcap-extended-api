@@ -4,6 +4,7 @@ import { BigNumber } from 'bignumber.js'
 import fromPairs from 'lodash/fromPairs'
 
 import request from 'request-promise-native'
+import cheerio from 'cheerio'
 
 const maybe = fn => val => val === null ? null : fn(val)
 
@@ -57,7 +58,7 @@ const groupByKey = (arr, key) => {
 
 const getAssets = withCached({
   group: 'ticker',
-  retrieve: async (ticker) => {
+  retrieve: async () => {
     let requestOptions = {
       uri: `https://api.coinmarketcap.com/v1/ticker/?limit=0`,
       json: true,
@@ -105,6 +106,61 @@ const getAssets = withCached({
 }
 */
 
+const getUrlFromId = id => `https://coinmarketcap.com/currencies/${id}`
+
+const getMarkets = async (id) => {
+  try {
+    const html = await request(getUrlFromId(id))
+    const $ = cheerio.load(html)
+    const marketsRow = $('#markets-table > tbody tr').get()
+    const rawMarketsHtml = marketsRow.map(r => $(r).children().get())
+    const columns = [
+      [],
+      ['exchange', c =>
+        c.text().trim()
+      ],
+      ['pair', c =>
+        ({ pair: c.text().trim(), url: c.find('a').attr('href'), })
+      ],
+      ['volumeUsd', c =>
+        BigNumber(c.find('span').data('usd'))
+      ],
+      ['priceUsd', c =>
+        BigNumber(c.find('span').data('usd'))]
+      ,
+      ['volumePercent', c =>
+        BigNumber((/([0-9]{0,3}\.[0-9]+)%/.exec(c.text().trim()) || [, c.text().trim()])[1])
+      ],
+    ]
+
+    const markets = rawMarketsHtml
+      .map(row =>
+        columns
+        .map(([ column, transform ]=[], i) => column &&
+          [ column, transform($(row[i])) ])
+        .filter(a => a)
+      )
+      .map(fromPairs)
+      .map(market => ({
+        ...market,
+        pair: market.pair.pair,
+        url: market.pair.url,
+      }))
+
+    return markets
+  } catch(e) {
+    console.error('[getMarkets]: ', e)
+  }
+}
+
+
+const getDetailed = withCached({
+  group: 'currencypage',
+  retrieve: async (id) => {
+
+  },
+})
+
 export default class CoinMarketCap {
   constructor(options={}) {
     const {
@@ -132,5 +188,11 @@ export default class CoinMarketCap {
   coinsFromTicker = async (ticker) =>
     (await getAssets(this.cache)).byTicker(ticker)
 
+  getMarkets = async (id) => {
+    return await getMarkets(id)
+  }
 
+  getMarketsFromTicker = async (ticker) => {
+    return await this.getMarkets(await this.idFromTicker(ticker))
+  }
 }
