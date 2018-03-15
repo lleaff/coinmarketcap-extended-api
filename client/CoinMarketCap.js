@@ -106,12 +106,8 @@ const getAssets = withCached({
 }
 */
 
-const getUrlFromId = id => `https://coinmarketcap.com/currencies/${id}`
-
-const getMarkets = async (id) => {
+const getMarkets = ($) => {
   try {
-    const html = await request(getUrlFromId(id))
-    const $ = cheerio.load(html)
     const marketsRow = $('#markets-table > tbody tr').get()
     const rawMarketsHtml = marketsRow.map(r => $(r).children().get())
     const columns = [
@@ -153,11 +149,34 @@ const getMarkets = async (id) => {
   }
 }
 
+const getLinks = ($) => {
+  try {
+    const linksRows = $('div.row.bottom-margin-2x > div.col-sm-4.col-sm-pull-8:last-child > ul')
+      .children().get()
+    const rawLinksHtml = linksRows.map(r => $(r).find('a'))
+      // Remove rows without a tag
+      .filter(a => a.get()[0])
+    const links = rawLinksHtml.map(a => ({
+      label: a.text().trim(),
+      url: a.attr('href'),
+    }))
+    return links
+  } catch(e) {
+    console.error('[getLinks]: ', e)
+  }
+}
 
-const getDetailed = withCached({
-  group: 'currencypage',
+const getUrlFromId = id => `https://coinmarketcap.com/currencies/${id}`
+
+const getAssetPage = withCached({
+  group: 'assetpage',
   retrieve: async (id) => {
-
+    const html = await request(getUrlFromId(id))
+    const $ = cheerio.load(html)
+    return {
+      markets: getMarkets($),
+      links: getLinks($),
+    }
   },
 })
 
@@ -189,10 +208,18 @@ export default class CoinMarketCap {
     (await getAssets(this.cache)).byTicker(ticker)
 
   getMarkets = async (id) => {
-    return await getMarkets(id)
+    return (await getAssetPage(this.cache, id)).markets
   }
 
   getMarketsFromTicker = async (ticker) => {
     return await this.getMarkets(await this.idFromTicker(ticker))
+  }
+
+  getLinks = async (id) => {
+    return (await getAssetPage(this.cache, id)).links
+  }
+
+  getLinksFromTicker = async (ticker) => {
+    return await this.getLinks(await this.idFromTicker(ticker))
   }
 }

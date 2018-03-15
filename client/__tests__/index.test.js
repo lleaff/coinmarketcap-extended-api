@@ -33,6 +33,11 @@ const MarketValidators = {
   url: url => typeof url === 'string',
 }
 
+const LinkValidator = {
+  label: label => (typeof label === 'string' && label !== ''),
+  url: url => (typeof url === 'string' && url !== ''),
+}
+
 const matchValidators = (received, argument) => {
   for (const [key, validator] of Object.entries(argument)) {
     if (!(key in received)) {
@@ -66,6 +71,16 @@ expect.extend({
   toBeMarket(received) {
     return matchValidators(received, MarketValidators)
   },
+
+  toBeLink(received) {
+    if (received.label === received.url) {
+      return {
+        message: () => `Label same as URL: "${received.label}"`,
+        pass: false,
+      }
+    }
+    return matchValidators(received, LinkValidator)
+  }
 })
 
 /*
@@ -181,10 +196,31 @@ const apiTests = async (CMC) => {
       }
     })
   })
+
+  describe('getMarkets', async () => {
+    it('Returns a list of Markets for a given ID', async () => {
+      const links = await CMC.getLinks('bitcoin')
+      for (const link of links) {
+        expect(link).toBeLink()
+      }
+    })
+  })
+
+
+  describe('getLinksFromTicker', async () => {
+    it('Returns a list of Links for a given ticker', async () => {
+      const links = await CMC.getLinksFromTicker('BTC')
+      for (const link of links) {
+        expect(link).toBeLink()
+      }
+    })
+  })
 }
 
-const CMC = new CoinMarketCap()
-apiTests(CMC)
+describe('With built-in cache', async () => {
+  const CMC = new CoinMarketCap()
+  await apiTests(CMC)
+})
 
 // describe('With custom cache', () => {
 //   const CMCcache = new CoinMarketCap({
