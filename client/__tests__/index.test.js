@@ -1,5 +1,11 @@
 import CoinMarketCap from '..'
 
+jest.mock('request-promise-native', () => {
+  return jest.fn(() => 'yo')
+})
+const request = require('request-promise-native')
+
+
 import {
   matchValidators,
   AssetValidators,
@@ -70,102 +76,118 @@ expect.extend({
  */
 
 const apiTests = async (CMC) => {
-  describe('idFromTicker', async () => {
-    it('Returns a coinmarketcap ID for a given ticker', async () => {
-      const id = await CMC.idFromTicker('btc')
-      expect(id).toEqual('bitcoin')
+  describe('API:', async () => {
+    describe('idFromTicker', async () => {
+      it('Returns a coinmarketcap ID for a given ticker', async () => {
+        const id = await CMC.idFromTicker('btc')
+        expect(id).toEqual('bitcoin')
+      })
     })
-  })
 
-  describe('coin', async () => {
-    it('Returns the Asset for a given ID', async () => {
-      const assetBitcoin = await CMC.coin('bitcoin')
+    describe('coin', async () => {
+      it('Returns the Asset for a given ID', async () => {
+        const assetBitcoin = await CMC.coin('bitcoin')
 
-      expect(assetBitcoin).toBeAsset()
-      expect(assetBitcoin).toMatchObject({
-        id: 'bitcoin',
-        ticker: 'BTC',
+        expect(assetBitcoin).toBeAsset()
+        expect(assetBitcoin).toMatchObject({
+          id: 'bitcoin',
+          ticker: 'BTC',
+        })
+      })
+    })
+
+    describe('coins', async () => {
+      it('Returns every Asset on CoinMarketCap', async () => {
+        const coins = await CMC.coins()
+
+        for (const coin of coins) {
+          expect(coin).toBeAsset()
+        }
+      })
+    })
+
+    describe('coinFromTicker', async () => {
+      it('Returns the Asset with the biggest marketcap for a given ticker', async () => {
+        const assetBitcoin = await CMC.coinFromTicker('BTC')
+
+        expect(assetBitcoin).toBeAsset()
+        expect(assetBitcoin).toMatchObject({
+          id: 'bitcoin',
+          ticker: 'BTC',
+        })
+      })
+    })
+
+    describe('coinsFromTicker', async () => {
+      it('Returns all possible Assets for a given ticker', async () => {
+        const assetsBTC = await CMC.coinsFromTicker('BTC')
+
+        for (const asset of assetsBTC) {
+          expect(asset).toBeAsset()
+        }
+        expect(assetsBTC[0]).toMatchObject({
+          id: 'bitcoin',
+          ticker: 'BTC',
+        })
+      })
+    })
+
+    describe('getMarkets', async () => {
+      it('Returns a list of Markets for a given ID', async () => {
+        const markets = await CMC.getMarkets('bitcoin')
+        for (const market of markets) {
+          expect(market).toBeMarket()
+        }
+      })
+    })
+
+    describe('getMarketsFromTicker', async () => {
+      it('Returns a list of Markets for a given ticker', async () => {
+        const markets = await CMC.getMarketsFromTicker('BTC')
+        for (const market of markets) {
+          expect(market).toBeMarket()
+        }
+      })
+    })
+
+    describe('getMarkets', async () => {
+      it('Returns a list of Markets for a given ID', async () => {
+        const links = await CMC.getLinks('bitcoin')
+        expect(links.some(link => /^http:\/\//.test(link.url))).toBe(true)
+        for (const link of links) {
+          expect(link).toBeLink()
+        }
+      })
+    })
+
+
+    describe('getLinksFromTicker', async () => {
+      it('Returns a list of Links for a given ticker', async () => {
+        const links = await CMC.getLinksFromTicker('BTC')
+        for (const link of links) {
+          expect(link).toBeLink()
+        }
       })
     })
   })
+}
 
-  describe('coins', async () => {
-    it('Returns every Asset on CoinMarketCap', async () => {
-      const coins = await CMC.coins()
+const cacheTests = async (CMC) => {
+  describe('Cache', async () => {
+    it('Is not called on a second call of a function with the same arguments', async () => {
 
-      for (const coin of coins) {
-        expect(coin).toBeAsset()
-      }
-    })
-  })
-
-  describe('coinFromTicker', async () => {
-    it('Returns the Asset with the biggest marketcap for a given ticker', async () => {
-      const assetBitcoin = await CMC.coinFromTicker('BTC')
-
-      expect(assetBitcoin).toBeAsset()
-      expect(assetBitcoin).toMatchObject({
-        id: 'bitcoin',
-        ticker: 'BTC',
-      })
-    })
-  })
-
-  describe('coinsFromTicker', async () => {
-    it('Returns all possible Assets for a given ticker', async () => {
-      const assetsBTC = await CMC.coinsFromTicker('BTC')
-
-      for (const asset of assetsBTC) {
-        expect(asset).toBeAsset()
-      }
-      expect(assetsBTC[0]).toMatchObject({
-        id: 'bitcoin',
-        ticker: 'BTC',
-      })
-    })
-  })
-
-  describe('getMarkets', async () => {
-    it('Returns a list of Markets for a given ID', async () => {
-      const markets = await CMC.getMarkets('bitcoin')
-      for (const market of markets) {
-        expect(market).toBeMarket()
-      }
-    })
-  })
-
-  describe('getMarketsFromTicker', async () => {
-    it('Returns a list of Markets for a given ticker', async () => {
-      const markets = await CMC.getMarketsFromTicker('BTC')
-      for (const market of markets) {
-        expect(market).toBeMarket()
-      }
-    })
-  })
-
-  describe('getMarkets', async () => {
-    it('Returns a list of Markets for a given ID', async () => {
-      const links = await CMC.getLinks('bitcoin')
-      for (const link of links) {
-        expect(link).toBeLink()
-      }
-    })
-  })
-
-
-  describe('getLinksFromTicker', async () => {
-    it('Returns a list of Links for a given ticker', async () => {
-      const links = await CMC.getLinksFromTicker('BTC')
-      for (const link of links) {
-        expect(link).toBeLink()
-      }
+      const coin1 = await CMC.coin('bitcoin')
+      console.log(coin1)
+      const coin2 = await CMC.coin('bitcoin')
+      console.log(coin2)
     })
   })
 }
 
 describe('With built-in cache', async () => {
   const CMC = new CoinMarketCap()
-  await apiTests(CMC)
+  //apiTests(CMC)
+  cacheTests(CMC)
 })
 
 // describe('With custom cache', () => {
