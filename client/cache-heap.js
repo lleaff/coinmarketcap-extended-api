@@ -15,10 +15,4 @@ export default class HeapCache {
   async has(key) {
     return this.store.has(key)
   }
-
-  async clear() {
-    this.store = new Map()
-  }
 }
-
-export const heapCache = (...args) => new HeapCache(...args)

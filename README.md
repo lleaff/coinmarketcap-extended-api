@@ -2,7 +2,8 @@
 
 Node.js client for accessing [CoinMarketCap](https://coinmarketcap.com/) data.
 
-Uses a local cache to avoid re-fetching coin info too frequently. Cache container can be overriden.
+Uses a local cache to avoid re-fetching coin info too frequently.
+The cache can be configured or overriden.
 
 ## Installation
 
@@ -31,30 +32,30 @@ CMC.getMarketsFromTicker('ETH')
 * **`new CoinMarketCap([options]): APIInstance`**  
   * `options`: Object with any of the below properties:  
     * `cache`: Can be used to override the default in-JS heap cache.  
-                Must be an obwith `has`, `get` and `set` methods.  
+               Must be an object with `has`, `get` and `set` methods.  
 
       The default cache is managed automatically (invalidated after 6 hours by default), and can also be refreshed manually by calling `refreshCache`.
 
 
 ### Instance methods:
 
-* **`idFromTicker(ticker): id`**  
+* **`idFromTicker(ticker): Promise<id>`**  
 
-* **`coins(): [Asset]`**  
+* **`coins(): Promise<[Asset]>`**  
 
-* **`coin(id): Asset`**  
+* **`coin(id): Promise<Asset>`**  
 
-* **`coinFromTicker(ticker): Asset`**  
+* **`coinFromTicker(ticker): Promise<Asset>`**  
 
-* **`coinsFromTicker(ticker): Asset`**  
+* **`coinsFromTicker(ticker): Promise<Asset>`**  
 
-* **`getMarkets(id): [Market]`**  
+* **`getMarkets(id): Promise<[Market]>`**  
 1aw
-* **`getMarketsFromTicker(ticker): [Market]`**  
+* **`getMarketsFromTicker(ticker): Promise<[Market]>`**  
 
-* **`getLinks(id): [Link]`**  
+* **`getLinks(id): Promise<[Link]>`**  
 
-* **`getLinksFromTicker(ticker): [Link]`**  
+* **`getLinksFromTicker(ticker): Promise<[Link]>`**  
 
 ### Instance properties:
 
@@ -98,3 +99,34 @@ CMC.getMarketsFromTicker('ETH')
 * **`Link`**: Links related to the asset.
   * **`label`**: `string` Resource label
   * **`url`**: `string`: Resource URL
+
+## Configuring the cache:
+
+The default cache can be configured with expiry for all entries. Default is 5 minutes: 
+
+```javascript
+import CoinMarketCap, { defaultCache } from 'coinmarketcap-extended-api'
+
+const CMC = new CoinMarketCap({
+  cache: defaultCache({
+    expiry: 30e3, // Expire cache entries after 30 seconds
+  }),
+})
+```
+Or configure the expiry of different type of cache entries individually: 
+
+```javascript
+const CMC = new CoinMarketCap({
+  cache: defaultCache({
+    expiry: {
+      assets: 2*60*1000, // Expire after 2 minutes
+      assetpage: 60*60*1000, // Expire after 1 hour
+      default: 5*60*1000,
+    },
+  }),
+})
+```
+The `assets` cache group is used for the `idFromTicker`, `coins`, `coin`, `coinFromTicker`, and `coinsFromTicker` methods.
+The `assetpage` group for `getMarkets`, `getMarketsFromTicker`, `getLinks` and `getLinksFromTicker`.
+
+Additionaly, DefaultCache has a `clear` method that deletes the cached data.

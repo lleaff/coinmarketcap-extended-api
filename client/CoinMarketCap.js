@@ -1,4 +1,4 @@
-import { heapCache } from './cache-heap'
+import { defaultCache } from './cache-default'
 import { withCached } from './cache'
 import { BigNumber } from 'bignumber.js'
 import fromPairs from 'lodash/fromPairs'
@@ -173,7 +173,13 @@ const getAssetPage = withCached({
 export default class CoinMarketCap {
   constructor(options={}) {
     const {
-      cache=heapCache()
+      cache=defaultCache({
+        expiry: {
+          'assets': 5*60*1000,
+          'assetspage': 5*60*1000,
+          'default': 5*60*1000,
+        },
+      })
     } = options
 
     this.cache = cache
