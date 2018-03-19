@@ -160,3 +160,14 @@ Cache keys follow a `<group>:<key>` format.
 
 * **`assets:all`**: Used with `idFromTicker`, `coins`, `coin`, `coinFromTicker`, `coinsFromTicker`.
 * **`assetpage:<id>`**: Used with `getMarkets`, `getMarketsFromTicker`, `getLinks`, `getLinksFromTicker`.
+
+
+## Development
+
+```bash
+npm run build:watch
+```
+
+```bash
+npm run test:watch
+```
