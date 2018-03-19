@@ -76,8 +76,12 @@ export default class DefaultCache extends HeapCache {
     return lastUpdated + expiry < Date.now()
   }
 
-  async clear() {
-    this.store = new Map()
+  async clear(key) {
+    if (typeof key === 'string') {
+      return this.store.delete(key)
+    } else {
+      this.store = new Map()
+    }
   }
 }
 
