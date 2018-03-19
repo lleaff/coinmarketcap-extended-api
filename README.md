@@ -59,10 +59,10 @@ CMC.getMarketsFromTicker('ETH')
 
 ### Instance properties:
 
-* **`cache`**: Cache object optionally provided in constructor. Must have `has`, `get` and `set` methods. You typically won't need to interact with it directly, but it is provided as an escape hatch for finer grained control.  
-    * `get(key: string): JSONSerializable`
-    * `has(key: string): boolean`
-    * `set(key: string, value: JSONSerializable)`
+* **`cache`**: The cache instance. You typically won't need to interact with it directly, but it is provided as an escape hatch for finer grained control.  
+  * **`get(key: string): Promise<JSONSerializable>`**  
+  * **`set(key: string, value: JSONSerializable): Promise<boolean>`**  
+  * **`has(key: string): Promise<boolean>`**  
 
 ### Types:
 
@@ -100,15 +100,17 @@ CMC.getMarketsFromTicker('ETH')
   * **`label`**: `string` Resource label
   * **`url`**: `string`: Resource URL
 
-## Configuring the cache:
+## Cache
+
+### DefaultCache
 
 The default cache can be configured with expiry for all entries. Default is 5 minutes: 
 
 ```javascript
-import CoinMarketCap, { defaultCache } from 'coinmarketcap-extended-api'
+import CoinMarketCap, { DefaultCache } from 'coinmarketcap-extended-api'
 
 const CMC = new CoinMarketCap({
-  cache: defaultCache({
+  cache: new DefaultCache({
     expiry: 30e3, // Expire cache entries after 30 seconds
   }),
 })
@@ -117,7 +119,7 @@ Or configure the expiry of different type of cache entries individually:
 
 ```javascript
 const CMC = new CoinMarketCap({
-  cache: defaultCache({
+  cache: new DefaultCache({
     expiry: {
       assets: 2*60*1000, // Expire after 2 minutes
       assetpage: 60*60*1000, // Expire after 1 hour
@@ -126,7 +128,38 @@ const CMC = new CoinMarketCap({
   }),
 })
 ```
-The `assets` cache group is used for the `idFromTicker`, `coins`, `coin`, `coinFromTicker`, and `coinsFromTicker` methods.
-The `assetpage` group for `getMarkets`, `getMarketsFromTicker`, `getLinks` and `getLinksFromTicker`.
 
-Additionaly, DefaultCache has a `clear` method that deletes the cached data.
+#### API
+
+##### Constructor:
+* **`new DefaultCache([options]): DefaultCacheInstance`**  
+  * `options`: Object with any of the below properties:  
+    * `init`: `[[key: string, value: any]]` Store's initial content, argument to Map consructor.
+    * `expiry`: `int|{group: string: int}` Time in milliseconds before a cache entry is considered stale.  
+      Can be indicated as a number for every entry, or an object with different durations for each group.
+      The object keys are groups and the values the corresponding expiry time. The object should have a `default` key.
+
+##### Instance methods:
+
+Cache interface:  
+
+* **`get(key: string): Promise<JSONSerializable>`**  
+* **`set(key: string, value: JSONSerializable): Promise<boolean>`**  
+* **`has(key: string): Promise<boolean>`**  
+
+Additional methods and properties:  
+
+* **`isStale([key: string]): Promise<boolean>`**  
+    Returns whether the given cache entry has expired.
+* **`clear([key: string]): Promise<boolean>`**  
+    Delete data for an entry, or the entire store if no argument is supplied.
+* **`store`**  
+    `Map` instance used as back-end store for the cache.
+
+
+### Cache keys
+
+Cache keys follow a `<group>:<key>` format.
+
+* **`assets:all`**: Used with `idFromTicker`, `coins`, `coin`, `coinFromTicker`, `coinsFromTicker`.
+* **`assetpage:<id>`**: Used with `getMarkets`, `getMarketsFromTicker`, `getLinks`, `getLinksFromTicker`.

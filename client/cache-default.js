@@ -53,7 +53,7 @@ export default class DefaultCache extends HeapCache {
 
   async set(key, value) {
     validateKey(key)
-    return await super.set(key, { value: value, lastUpdated: Date.now(), })
+    return !!await super.set(key, { value: value, lastUpdated: Date.now(), })
   }
 
   async get(key) {
@@ -65,11 +65,12 @@ export default class DefaultCache extends HeapCache {
     if (!await super.has(key)) {
       return false
     }
-    const { lastUpdated } = await super.get(key)
-    return !this.isStale(key, lastUpdated)
+    return !await this.isStale(key)
   }
 
-  isStale(key, lastUpdated) {
+  async isStale(key) {
+    if (!key) { throw new TypeError(`DefaultCache#isStale: Argument "key" not supplied, got "${key}".`); }
+    const { lastUpdated } = await super.get(key)
     const expiry = typeof this.expiry === 'number' ?
       this.expiry :
       (this.expiry[getGroup(key)] || this.expiry.default)
