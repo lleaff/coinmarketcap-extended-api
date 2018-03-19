@@ -1,8 +1,11 @@
-export function fromPairs(arr) {
-  const o = {}
-  for (const [key, val] of arr) {
-    o[key] = val
+export const groupByKey = (arr, key) => {
+  const map = new Map()
+  for (const obj of arr) {
+    if (map.has(obj[key])) {
+      map.get(obj[key]).push(obj)
+    } else {
+      map.set(obj[key], [obj])
+    }
   }
-  return o
+  return map
 }
-

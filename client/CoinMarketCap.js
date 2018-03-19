@@ -2,6 +2,7 @@ import { heapCache } from './cache-heap'
 import { withCached } from './cache'
 import { BigNumber } from 'bignumber.js'
 import fromPairs from 'lodash/fromPairs'
+import { groupByKey } from './utils.js'
 
 import request from 'request-promise-native'
 import cheerio from 'cheerio'
@@ -44,20 +45,9 @@ const formatAssetData = (raw, transforms) => fromPairs(transforms.map(
   ({ key, newKey, transform=(a=>a) }) => ([newKey, transform(raw[key])])
 ))
 
-const groupByKey = (arr, key) => {
-  const map = new Map()
-  for (const obj of arr) {
-    if (map.has(obj[key])) {
-      map.get(obj[key]).push(obj)
-    } else {
-      map.set(obj[key], [obj])
-    }
-  }
-  return map
-}
-
 const getAssets = withCached({
-  group: 'ticker',
+  group: 'assets',
+  getKey: 'all',
   retrieve: async () => {
     let requestOptions = {
       uri: `https://api.coinmarketcap.com/v1/ticker/?limit=0`,

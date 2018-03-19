@@ -1,11 +1,6 @@
 import CoinMarketCap from '..'
 
-jest.mock('request-promise-native', () => {
-  return jest.fn(() => 'yo')
-})
-const request = require('request-promise-native')
-
-
+import { spyOnMethods } from './test-utils'
 import {
   matchValidators,
   AssetValidators,
@@ -79,6 +74,7 @@ const apiTests = async (CMC) => {
   describe('API:', async () => {
     describe('idFromTicker', async () => {
       it('Returns a coinmarketcap ID for a given ticker', async () => {
+        expect.assertions(1)
         const id = await CMC.idFromTicker('btc')
         expect(id).toEqual('bitcoin')
       })
@@ -86,6 +82,7 @@ const apiTests = async (CMC) => {
 
     describe('coin', async () => {
       it('Returns the Asset for a given ID', async () => {
+        expect.assertions(2)
         const assetBitcoin = await CMC.coin('bitcoin')
 
         expect(assetBitcoin).toBeAsset()
@@ -98,6 +95,7 @@ const apiTests = async (CMC) => {
 
     describe('coins', async () => {
       it('Returns every Asset on CoinMarketCap', async () => {
+        expect.hasAssertions()
         const coins = await CMC.coins()
 
         for (const coin of coins) {
@@ -108,6 +106,7 @@ const apiTests = async (CMC) => {
 
     describe('coinFromTicker', async () => {
       it('Returns the Asset with the biggest marketcap for a given ticker', async () => {
+        expect.assertions(2)
         const assetBitcoin = await CMC.coinFromTicker('BTC')
 
         expect(assetBitcoin).toBeAsset()
@@ -120,6 +119,7 @@ const apiTests = async (CMC) => {
 
     describe('coinsFromTicker', async () => {
       it('Returns all possible Assets for a given ticker', async () => {
+        expect.hasAssertions()
         const assetsBTC = await CMC.coinsFromTicker('BTC')
 
         for (const asset of assetsBTC) {
@@ -134,6 +134,7 @@ const apiTests = async (CMC) => {
 
     describe('getMarkets', async () => {
       it('Returns a list of Markets for a given ID', async () => {
+        expect.hasAssertions()
         const markets = await CMC.getMarkets('bitcoin')
         for (const market of markets) {
           expect(market).toBeMarket()
@@ -143,6 +144,7 @@ const apiTests = async (CMC) => {
 
     describe('getMarketsFromTicker', async () => {
       it('Returns a list of Markets for a given ticker', async () => {
+        expect.hasAssertions()
         const markets = await CMC.getMarketsFromTicker('BTC')
         for (const market of markets) {
           expect(market).toBeMarket()
@@ -152,6 +154,7 @@ const apiTests = async (CMC) => {
 
     describe('getMarkets', async () => {
       it('Returns a list of Markets for a given ID', async () => {
+        expect.hasAssertions()
         const links = await CMC.getLinks('bitcoin')
         expect(links.some(link => /^http:\/\//.test(link.url))).toBe(true)
         for (const link of links) {
@@ -163,6 +166,7 @@ const apiTests = async (CMC) => {
 
     describe('getLinksFromTicker', async () => {
       it('Returns a list of Links for a given ticker', async () => {
+        expect.hasAssertions()
         const links = await CMC.getLinksFromTicker('BTC')
         for (const link of links) {
           expect(link).toBeLink()
@@ -173,26 +177,71 @@ const apiTests = async (CMC) => {
 }
 
 const cacheTests = async (CMC) => {
+  const cache = CMC.cache
   describe('Cache', async () => {
-    it('Is not called on a second call of a function with the same arguments', async () => {
+    describe('Retrieve function is not called on a second call with the same arguments', async () => {
+      it('.coin', async () => {
+        expect.assertions(3)
+        cache.get.mockClear(); cache.set.mockClear(); cache.has.mockClear();
+        const coin1 = await CMC.coin('bitcoin')
+        const coin2 = await CMC.coin('bitcoin')
+        const coin3 = await CMC.coin('bitcoin')
+        expect(cache.has).toHaveBeenCalledTimes(3)
+        expect(cache.set).toHaveBeenCalledTimes(1)
+        expect(cache.get).toHaveBeenCalledTimes(2)
+      })
 
-      const coin1 = await CMC.coin('bitcoin')
-      console.log(coin1)
-      const coin2 = await CMC.coin('bitcoin')
-      console.log(coin2)
+      it('.getMarkets', async () => {
+        expect.assertions(3)
+        cache.get.mockClear(); cache.set.mockClear(); cache.has.mockClear();
+        const markets1 = await CMC.getMarkets('bitcoin')
+        const markets2 = await CMC.getMarkets('bitcoin')
+        const markets3 = await CMC.getMarkets('bitcoin')
+        expect(cache.has).toHaveBeenCalledTimes(3)
+        expect(cache.set).toHaveBeenCalledTimes(1)
+        expect(cache.get).toHaveBeenCalledTimes(2)
+      })
+
+      it('.getLinks', async () => {
+        expect.assertions(3)
+        cache.get.mockClear(); cache.set.mockClear(); cache.has.mockClear();
+        const links1 = await CMC.getLinks('bitcoin')
+        const links2 = await CMC.getLinks('bitcoin')
+        const links3 = await CMC.getLinks('bitcoin')
+        // We have the asset page data from .getMarkets test, so no fetching
+        // should occur here.
+        expect(cache.has).toHaveBeenCalledTimes(3)
+        expect(cache.set).toHaveBeenCalledTimes(0)
+        expect(cache.get).toHaveBeenCalledTimes(3)
+      })
     })
   })
 }
 
 describe('With built-in cache', async () => {
   const CMC = new CoinMarketCap()
-  //apiTests(CMC)
-  cacheTests(CMC)
+  await apiTests(CMC)
 })
 
-// describe('With custom cache', () => {
-//   const CMCcache = new CoinMarketCap({
-//     cache: 'TODO',
-//   })
-//   apiTests(CMCcache)
-// })
+describe('With built-in cache', async () => {
+  const CMC = new CoinMarketCap()
+  CMC.cache = spyOnMethods(CMC.cache)
+  await cacheTests(CMC)
+})
+
+describe('With custom cache', async () => {
+  const CacheStore = { store: {} }
+  const cache = {
+    get: async (key) => CacheStore.store[key],
+    set: async (key, val) => { CacheStore.store[key] = val; },
+    has: async (key) => key in CacheStore.store,
+    clear: async () => { CacheStore.store = {}; },
+    store: CacheStore.store,
+  }
+  spyOnMethods(cache)
+  const CMCcache = new CoinMarketCap({
+    cache: cache,
+  })
+
+  await cacheTests(CMCcache)
+})
