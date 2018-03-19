@@ -34,9 +34,6 @@ CMC.getMarketsFromTicker('ETH')
     * `cache`: Can be used to override the default in-JS heap cache.  
                Must be an object with `has`, `get` and `set` methods.  
 
-      The default cache is managed automatically (invalidated after 6 hours by default), and can also be refreshed manually by calling `refreshCache`.
-
-
 ### Instance methods:
 
 * **`idFromTicker(ticker): Promise<id>`**  
@@ -115,7 +112,7 @@ const CMC = new CoinMarketCap({
   }),
 })
 ```
-Or configure the expiry of different type of cache entries individually: 
+You can also configure the expiry of different type of cache entries individually: 
 
 ```javascript
 const CMC = new CoinMarketCap({
