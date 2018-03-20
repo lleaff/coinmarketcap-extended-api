@@ -1,9 +1,13 @@
 # CoinMarketCap extended API
 
+[![npm](https://img.shields.io/npm/v/node-coinmarketcap-extended-api.svg)](https://www.npmjs.com/package/node-coinmarketcap-extended-api)
+
 Node.js client for accessing [CoinMarketCap](https://coinmarketcap.com/) data.
 
 Uses a local cache to avoid re-fetching coin info too frequently.
-The cache can be configured or overriden.
+The cache can be configured or overriden with a custom implementation.
+
+This module cannot be used in browsers due to CSP restrictions.
 
 ## Installation
 

@@ -1,8 +1,11 @@
 {
-  "name": "coinmarketcap-extended-api",
-  "version": "0.1.0",
+  "name": "node-coinmarketcap-extended-api",
+  "version": "1.0.0",
   "description": "Unofficial CoinMarketCap.com API augmented with website functionality",
-  "main": "client/index.js",
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "start": "npm run build:watch",
     "build": "babel client/ -d dist/",
