@@ -1,6 +1,4 @@
-# CoinMarketCap extended API
-
-[![npm](https://img.shields.io/npm/v/node-coinmarketcap-extended-api.svg)](https://www.npmjs.com/package/node-coinmarketcap-extended-api)
+# CoinMarketCap extended API [![npm](https://img.shields.io/npm/v/node-coinmarketcap-extended-api.svg)](https://www.npmjs.com/package/node-coinmarketcap-extended-api)
 
 Node.js client for accessing [CoinMarketCap](https://coinmarketcap.com/) data.
 
@@ -40,22 +38,22 @@ CMC.getMarketsFromTicker('ETH')
 
 ### Instance methods:
 
-* **`idFromTicker(ticker): Promise<id>`**  
-* **`coins(): Promise<[Asset]>`**  
-* **`coin(id): Promise<Asset>`**  
-* **`coinFromTicker(ticker): Promise<Asset>`**  
-* **`coinsFromTicker(ticker): Promise<Asset>`**  
-* **`getMarkets(id): Promise<[Market]>`**  
-* **`getMarketsFromTicker(ticker): Promise<[Market]>`**  
-* **`getLinks(id): Promise<[Link]>`**  
-* **`getLinksFromTicker(ticker): Promise<[Link]>`**  
+* `async`**`idFromTicker`**`(ticker): id`  
+* `async`**`coins`**`(): [Asset]`  
+* `async`**`coin`**`(id): Asset`  
+* `async`**`coinFromTicker`**`(ticker): Asset`  
+* `async`**`coinsFromTicker`**`(ticker): Asset`  
+* `async`**`getMarkets`**`(id): [Market]`  
+* `async`**`getMarketsFromTicker`**`(ticker): [Market]`  
+* `async`**`getLinks`**`(id): [Link]`  
+* `async`**`getLinksFromTicker`**`(ticker): [Link]`  
 
 ### Instance properties:
 
 * **`cache`**: The cache instance. You typically won't need to interact with it directly, but it is provided as an escape hatch for finer grained control.  
-  * **`get(key: string): Promise<JSONSerializable>`**  
-  * **`set(key: string, value: JSONSerializable): Promise<boolean>`**  
-  * **`has(key: string): Promise<boolean>`**  
+  * `async`**`get`**`(key: string): JSONSerializable`  
+  * `async`**`set`**`(key: string, value: JSONSerializable): boolean`  
+  * `async`**`has`**`(key: string): boolean`  
 
 ### Types:
 
@@ -136,15 +134,15 @@ const CMC = new CoinMarketCap({
 
 Cache interface:  
 
-* **`get(key: string): Promise<JSONSerializable>`**  
-* **`set(key: string, value: JSONSerializable): Promise<boolean>`**  
-* **`has(key: string): Promise<boolean>`**  
+* `async`**`get`**`(key: string): JSONSerializable`  
+* `async`**`set`**`(key: string, value: JSONSerializable): boolean`  
+* `async`**`has`**`(key: string): boolean`  
 
 Additional methods and properties:  
 
-* **`isStale([key: string]): Promise<boolean>`**  
+* `async`**`isStale`**`([key: string]):boolean`  
     Returns whether the given cache entry has expired.
-* **`clear([key: string]): Promise<boolean>`**  
+* `async`**`clear`**`([key: string]): boolean`  
     Delete data for an entry, or the entire store if no argument is supplied.
 * **`store`**  
     `Map` instance used as back-end store for the cache.
