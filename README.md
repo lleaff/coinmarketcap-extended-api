@@ -41,21 +41,13 @@ CMC.getMarketsFromTicker('ETH')
 ### Instance methods:
 
 * **`idFromTicker(ticker): Promise<id>`**  
-
 * **`coins(): Promise<[Asset]>`**  
-
 * **`coin(id): Promise<Asset>`**  
-
 * **`coinFromTicker(ticker): Promise<Asset>`**  
-
 * **`coinsFromTicker(ticker): Promise<Asset>`**  
-
 * **`getMarkets(id): Promise<[Market]>`**  
-1aw
 * **`getMarketsFromTicker(ticker): Promise<[Market]>`**  
-
 * **`getLinks(id): Promise<[Link]>`**  
-
 * **`getLinksFromTicker(ticker): Promise<[Link]>`**  
 
 ### Instance properties:
