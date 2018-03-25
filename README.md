@@ -10,7 +10,7 @@ This module cannot be used in browsers due to CSP restrictions.
 ## Installation
 
 ```sh
-npm install https://github.com/lleaff/coinmarketcap-extended-api.git
+npm install node-coinmarketcap-extended-api
 ```
 
 ## Usage
@@ -38,22 +38,22 @@ CMC.getMarketsFromTicker('ETH')
 
 ### Instance methods:
 
-* `async`**`idFromTicker`**`(ticker): id`  
-* `async`**`coins`**`(): [Asset]`  
-* `async`**`coin`**`(id): Asset`  
-* `async`**`coinFromTicker`**`(ticker): Asset`  
-* `async`**`coinsFromTicker`**`(ticker): Asset`  
-* `async`**`getMarkets`**`(id): [Market]`  
-* `async`**`getMarketsFromTicker`**`(ticker): [Market]`  
-* `async`**`getLinks`**`(id): [Link]`  
-* `async`**`getLinksFromTicker`**`(ticker): [Link]`  
+* `async` **`idFromTicker`**`(ticker)`: `id`  
+* `async` **`coins`**`()`: `[Asset]`  
+* `async` **`coin`**`(id)`: `Asset`  
+* `async` **`coinFromTicker`**`(ticker)`: `Asset`  
+* `async` **`coinsFromTicker`**`(ticker)`: `Asset`  
+* `async` **`getMarkets`**`(id)`: `[Market]`  
+* `async` **`getMarketsFromTicker`**`(ticker)`: `[Market]`  
+* `async` **`getLinks`**`(id)`: `[Link]`  
+* `async` **`getLinksFromTicker`**`(ticker)`: `[Link]`  
 
 ### Instance properties:
 
 * **`cache`**: The cache instance. You typically won't need to interact with it directly, but it is provided as an escape hatch for finer grained control.  
-  * `async`**`get`**`(key: string): JSONSerializable`  
-  * `async`**`set`**`(key: string, value: JSONSerializable): boolean`  
-  * `async`**`has`**`(key: string): boolean`  
+  * `async` **`get`**`(key: string)`: `JSONSerializable`  
+  * `async` **`set`**`(key: string, value: JSONSerializable)`: `boolean`  
+  * `async` **`has`**`(key: string)`: `boolean`  
 
 ### Types:
 
@@ -134,15 +134,15 @@ const CMC = new CoinMarketCap({
 
 Cache interface:  
 
-* `async`**`get`**`(key: string): JSONSerializable`  
-* `async`**`set`**`(key: string, value: JSONSerializable): boolean`  
-* `async`**`has`**`(key: string): boolean`  
+* `async` **`get`**`(key: string)`: `JSONSerializable`  
+* `async` **`set`**`(key: string, value: JSONSerializable)`: `boolean`  
+* `async` **`has`**`(key: string)`: `boolean`  
 
 Additional methods and properties:  
 
-* `async`**`isStale`**`([key: string]):boolean`  
+* `async` **`isStale`**`([key: string])`:`boolean`  
     Returns whether the given cache entry has expired.
-* `async`**`clear`**`([key: string]): boolean`  
+* `async` **`clear`**`([key: string])`: `boolean`  
     Delete data for an entry, or the entire store if no argument is supplied.
 * **`store`**  
     `Map` instance used as back-end store for the cache.
