@@ -1,4 +1,4 @@
-const CoinMarketCap = require('node-coinmarketcap-extended-api')
+const CoinMarketCap = require('node-coinmarketcap-extended-api').default
 
 const CMC = new CoinMarketCap()
 

@@ -1,6 +1,6 @@
 {
   "name": "node-coinmarketcap-extended-api",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Unofficial CoinMarketCap.com API augmented with website functionality",
   "main": "lib/index.js",
   "files": [

@@ -25,7 +25,7 @@ const CMC = new CoinMarketCap()
 
 CMC.getMarketsFromTicker('ETH')
   .then(markets => {
-    for (const market of marketfs) {
+    for (const market of markets) {
       console.log(`ETH trades at ${market.priceUsd} USD on ${market.exchange}.`)
     }
   })
