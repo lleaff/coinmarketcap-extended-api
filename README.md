@@ -52,14 +52,13 @@ CMC.getMarketsFromTicker('ETH')
 * `async` **`getLinks`**`(id)`: `[Link]`  
 * `async` **`getLinksFromTicker`**`(ticker)`: `[Link]`  
 * `async` **`global`**`()`: `GlobalData`  
-    `GlobalData`:
-    * **`totalMarketCapUsd:`**: `BigNumber` (USD)
-    * **`total24hVolumeUsd:`**: `BigNumber` (USD)
-    * **`bitcoinDominance:`**: `BigNumber` (%)
+    * **`totalMarketCapUsd:`**: `BigNumber` _(USD)_
+    * **`total24hVolumeUsd:`**: `BigNumber` _(USD)_
+    * **`bitcoinDominance:`**: `BigNumber` _(%)_: Percentage of Bitcoin marketcap relative to total marketcap.
     * **`activeCurrencies:`**: `int`
     * **`activeAssets`**: `int`
     * **`activeMarkets`**: `int`
-    * **`lastUpdated`**: `int` (seconds): UNIX time.
+    * **`lastUpdated`**: `int` _(seconds)_: UNIX time.
 
 ### Instance properties:
 
@@ -79,25 +78,25 @@ CMC.getMarketsFromTicker('ETH')
   * **`name`**: `string`
   * **`symbol`**: `string`
   * **`rank`**: `int`
-  * **`priceUsd`**: `BigNumber?` (USD)
-  * **`priceBtc`**: `BigNumber?` (BTC)
-  * **`volumeUsd24h`**: `BigNumber?` (USD)
-  * **`marketCapUsd`**: `BigNumber?` (USD)
-  * **`availableSupply`**: `BigNumber?` (tokens)
-  * **`totalSupply`**: `BigNumber?` (tokens)
-  * **`maxSupply`**: `BigNumber?` (tokens)
-  * **`percentChange1h`**: `BigNumber?` (%)
-  * **`percentChange24h`**: `BigNumber?` (%)
-  * **`percentChange7d`**: `BigNumber?` (%)
-  * **`lastUpdated`**: `int` (seconds): UNIX time.
+  * **`priceUsd`**: `BigNumber?` _(USD)_
+  * **`priceBtc`**: `BigNumber?` _(BTC)_
+  * **`volumeUsd24h`**: `BigNumber?` _(USD)_
+  * **`marketCapUsd`**: `BigNumber?` _(USD)_
+  * **`availableSupply`**: `BigNumber?` _(tokens)_
+  * **`totalSupply`**: `BigNumber?` _(tokens)_
+  * **`maxSupply`**: `BigNumber?` _(tokens)_
+  * **`percentChange1h`**: `BigNumber?` _(%)_
+  * **`percentChange24h`**: `BigNumber?` _(%)_
+  * **`percentChange7d`**: `BigNumber?` _(%)_
+  * **`lastUpdated`**: `int` _(seconds)_: UNIX time.
 
 * **`Market`**: Information related to a particular trading pair.
   * **`exchange`**: `string`: Name of the exchange.
   * **`base`**: `ticker`: Name of the base currency.
   * **`quote`**: `ticker`: Name of the traded asset.
   * **`url`**: `string`: URL to trading pair on exchange.
-  * **`volumeUsd24h`**: `BigNumber` (USD)
-  * **`priceUsd`**: `BigNumber` (USD)
+  * **`volumeUsd24h`**: `BigNumber` _(USD)_
+  * **`priceUsd`**: `BigNumber` _(USD)_
   * **`volumePercent`**: `BigNumber`: Percent of market 24h volume on global quote trading 24h volume.
 
 * **`Link`**: Links related to the asset.
@@ -121,6 +120,8 @@ const CMC = new CoinMarketCap({
 ```
 You can also configure the expiry of different type of cache entries individually: 
 
+<a name="example-individual-cache-expiries"></a>
+
 ```javascript
 const CMC = new CoinMarketCap({
   cache: new DefaultCache({
@@ -141,7 +142,8 @@ const CMC = new CoinMarketCap({
   * `options`: Object with any of the below properties:  
     * **`init`**: `[[key: string, value: any]]` Store's initial content, argument to Map consructor.
     * **`expiry`**: `int|{group: string: int}` _(default `300000` ie. 5 minutes)_ Time in milliseconds before a cache entry is considered stale.  
-      Can be indicated as a number for every entry, or an object with [different durations for each group](#cache-keys).
+      Can be indicated as a number for every entry, or an object with
+      [different durations for each group](#cache-keys) (see [example](#example-individual-cache-expiries)).
       The object keys are groups and the values the corresponding expiry time. The object should have a `default` key.
 
 ##### Instance methods:

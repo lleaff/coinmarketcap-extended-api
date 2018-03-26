@@ -115,10 +115,10 @@ const apiTests = async (CMC) => {
         }
       })
 
-      it('Returns every active asset', async () => {
+      it(`Has the same number of assets as global data's combined activeAssets and activeCurrencies`, async () => {
         expect.assertions(1)
         const [ coins, global ] = await Promise.all([ CMC.coins(), CMC.global() ])
-        expect(global.activeAssets < coins.length).toBe(true)
+        expect(global.activeAssets + global.activeCurrencies).toEqual(coins.length)
       })
     })
 
@@ -325,12 +325,6 @@ describe('With vanilla JS numbers', async () => {
       for (const coin of coins) {
         expect(coin).toBeAssetNoBigNum()
       }
-    })
-
-    it('Returns every active asset', async () => {
-      expect.assertions(1)
-      const [ coins, global ] = await Promise.all([ CMC.coins(), CMC.global() ])
-      expect(global.activeAssets < coins.length).toBe(true)
     })
   })
 
