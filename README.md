@@ -3,9 +3,10 @@
 Node.js client for accessing [CoinMarketCap](https://coinmarketcap.com/) data.
 
 Uses a local cache to avoid re-fetching coin info too frequently.
-The cache can be configured or overriden with a custom implementation.
+The cache can be [configured or overriden](#cache) with a custom implementation.
 
-This library outputs most numbers as [bignumber.js](https://github.com/MikeMcl/bignumber.js) instances by default. This can be deactivated.
+By default, most numbers are returned as [bignumber.js](https://github.com/MikeMcl/bignumber.js) instances.
+That behavior can be deactivated with a [constructor option](#option-bignumber).
 
 This module cannot be used in browsers due to CSP restrictions.
 
@@ -35,9 +36,9 @@ CMC.getMarketsFromTicker('ETH')
 
 * **`new CoinMarketCap([options]): APIInstance`**  
   * `options`: Object with any of the below properties:  
-    * `cache`: Can be used to override the default in-JS heap cache.  
+    * **`cache`**: Can be used to override the default in-JS heap cache.  
                Must be an object with `has`, `get` and `set` methods.  
-    * `BigNumber` default `true`: If set to false, returned numbers will be plain JavaScript `Number` instances.  
+    * <a name="option-bignumber"></a>**`BigNumber`**: `boolean` _(default `true`)_: If set to false, returned numbers will be plain JavaScript `Number` instances.  
 
 ### Instance methods:
 
