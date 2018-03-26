@@ -1,6 +1,14 @@
 {
   "presets": [
-    "env"
+    [
+      "env", {
+        "targets": {
+          "node": "7"
+        },
+        "useBuiltIns": true,
+        "exclude": ["transform-async-to-generator"]
+      }
+    ]
   ],
   "plugins": [
     "transform-object-rest-spread",

@@ -5,9 +5,10 @@ Node.js client for accessing [CoinMarketCap](https://coinmarketcap.com/) data.
 Uses a local cache to avoid re-fetching coin info too frequently.
 The cache can be [configured or overriden](#cache) with a custom implementation.
 
-By default, most numbers are returned as [bignumber.js](https://github.com/MikeMcl/bignumber.js) instances.
-That behavior can be deactivated with a [constructor option](#option-bignumber).
+By default, most numbers are returned as [bignumber.js](https://github.com/MikeMcl/bignumber.js) instances. That behavior can be deactivated with a [constructor option](#option-bignumber) to make the library output only plain JavaScript numbers.  
+This choice was made because default JavaScript numbers are represented by floats internally, and thus are imprecise. `BigNumber`s can be converted to plain JS numbers by calling `.toNumber` on them, or prefixing them with the unary operator `+`.
 
+Requires Node.js v7 or superior.
 This module cannot be used in browsers due to CSP restrictions.
 
 ## Installation
@@ -143,7 +144,7 @@ const CMC = new CoinMarketCap({
     * **`init`**: `[[key: string, value: any]]` Store's initial content, argument to Map consructor.
     * **`expiry`**: `int|{group: string: int}` _(default `300000` ie. 5 minutes)_ Time in milliseconds before a cache entry is considered stale.  
       Can be indicated as a number for every entry, or an object with
-      [different durations for each group](#cache-keys) (see [example](#example-individual-cache-expiries)).
+      different durations for each [group](#cache-keys) (see [example](#example-individual-cache-expiries)).
       The object keys are groups and the values the corresponding expiry time. The object should have a `default` key.
 
 ##### Instance methods:

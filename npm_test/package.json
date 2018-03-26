@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "node-coinmarketcap-extended-api": "^1.2.2"
+    "node-coinmarketcap-extended-api": "^1.3.0"
   }
 }
