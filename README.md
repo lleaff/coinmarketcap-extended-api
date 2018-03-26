@@ -38,7 +38,7 @@ CMC.getMarketsFromTicker('ETH')
   * `options`: Object with any of the below properties:  
     * **`cache`**: Can be used to override the default in-JS heap cache.  
                Must be an object with `has`, `get` and `set` methods.  
-    * <a name="option-bignumber"></a>**`BigNumber`**: `boolean` _(default `true`)_: If set to false, returned numbers will be plain JavaScript `Number` instances.  
+    * <a name="option-bignumber"></a>**`BigNumber`**: `boolean` _(default: `true`)_: If set to false, returned numbers will be plain JavaScript `Number` instances.  
 
 ### Instance methods:
 
@@ -108,7 +108,7 @@ CMC.getMarketsFromTicker('ETH')
 
 ### DefaultCache
 
-The default cache can be configured with expiry for all entries. Default is 5 minutes: 
+The default cache can be configured with expiry for all entries. Default is 5 minutes.  
 
 ```javascript
 import CoinMarketCap, { DefaultCache } from 'coinmarketcap-extended-api'
@@ -127,6 +127,7 @@ const CMC = new CoinMarketCap({
     expiry: {
       assets: 2*60*1000, // Expire after 2 minutes
       assetpage: 60*60*1000, // Expire after 1 hour
+      global: 40*1000// Expire after 40 seconds
       default: 5*60*1000,
     },
   }),
@@ -138,8 +139,8 @@ const CMC = new CoinMarketCap({
 ##### Constructor:
 * **`new DefaultCache([options]): DefaultCacheInstance`**  
   * `options`: Object with any of the below properties:  
-    * `init`: `[[key: string, value: any]]` Store's initial content, argument to Map consructor.
-    * `expiry`: `int|{group: string: int}` Time in milliseconds before a cache entry is considered stale.  
+    * **`init`**: `[[key: string, value: any]]` Store's initial content, argument to Map consructor.
+    * **`expiry`**: `int|{group: string: int}` _(default `300000` ie. 5 minutes)_ Time in milliseconds before a cache entry is considered stale.  
       Can be indicated as a number for every entry, or an object with different durations for each group.
       The object keys are groups and the values the corresponding expiry time. The object should have a `default` key.
 
