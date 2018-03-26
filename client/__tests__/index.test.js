@@ -6,7 +6,10 @@ import {
   AssetValidators,
   MarketValidators,
   LinkValidators,
-  globalDataValidators,
+  GlobalDataValidators,
+  AssetValidatorsNoBigNum,
+  MarketValidatorsNoBigNum,
+  GlobalDataValidatorsNoBigNum,
 } from './validators'
 
 expect.extend({
@@ -18,6 +21,14 @@ expect.extend({
 
   toBeMarket(received) {
     return matchValidators(received, MarketValidators)
+  },
+
+  toBeAssetNoBigNum(received) {
+    return matchValidators(received, AssetValidatorsNoBigNum)
+  },
+
+  toBeMarketNoBigNum(received) {
+    return matchValidators(received, MarketValidatorsNoBigNum)
   },
 
   toBeLink(received) {
@@ -159,7 +170,7 @@ const apiTests = async (CMC) => {
       })
     })
 
-    describe('getMarkets', async () => {
+    describe('getLinks', async () => {
       it('Returns a list of Markets for a given ID', async () => {
         expect.hasAssertions()
         const links = await CMC.getLinks('bitcoin')
@@ -185,7 +196,7 @@ const apiTests = async (CMC) => {
       it('Returns CoinMarketCap global data', async () => {
         expect.hasAssertions()
         const globalData = await CMC.global()
-        expect(globalData).toMatchValidators(globalDataValidators)
+        expect(globalData).toMatchValidators(GlobalDataValidators)
       })
     })
   })
@@ -278,4 +289,104 @@ describe('With custom cache', async () => {
   })
 
   await cacheTests(CMCcache)
+})
+
+describe('With vanilla JS numbers', async () => {
+  const CMC = new CoinMarketCap({
+    BigNumber: false,
+  })
+
+  describe('idFromTicker', async () => {
+    it('Returns a coinmarketcap ID for a given ticker', async () => {
+      expect.assertions(1)
+      const id = await CMC.idFromTicker('btc')
+      expect(id).toEqual('bitcoin')
+    })
+  })
+
+  describe('coin', async () => {
+    it('Returns the Asset for a given ID', async () => {
+      expect.assertions(2)
+      const assetBitcoin = await CMC.coin('bitcoin')
+
+      expect(assetBitcoin).toBeAssetNoBigNum()
+      expect(assetBitcoin).toMatchObject({
+        id: 'bitcoin',
+        ticker: 'BTC',
+      })
+    })
+  })
+
+  describe('coins', async () => {
+    it('Returns every Asset on CoinMarketCap', async () => {
+      expect.hasAssertions()
+      const coins = await CMC.coins()
+
+      for (const coin of coins) {
+        expect(coin).toBeAssetNoBigNum()
+      }
+    })
+
+    it('Returns every active asset', async () => {
+      expect.assertions(1)
+      const [ coins, global ] = await Promise.all([ CMC.coins(), CMC.global() ])
+      expect(global.activeAssets < coins.length).toBe(true)
+    })
+  })
+
+  describe('coinFromTicker', async () => {
+    it('Returns the Asset with the biggest marketcap for a given ticker', async () => {
+      expect.assertions(2)
+      const assetBitcoin = await CMC.coinFromTicker('BTC')
+
+      expect(assetBitcoin).toBeAssetNoBigNum()
+      expect(assetBitcoin).toMatchObject({
+        id: 'bitcoin',
+        ticker: 'BTC',
+      })
+    })
+  })
+
+  describe('coinsFromTicker', async () => {
+    it('Returns all possible Assets for a given ticker', async () => {
+      expect.hasAssertions()
+      const assetsBTC = await CMC.coinsFromTicker('BTC')
+
+      for (const asset of assetsBTC) {
+        expect(asset).toBeAssetNoBigNum()
+      }
+      expect(assetsBTC[0]).toMatchObject({
+        id: 'bitcoin',
+        ticker: 'BTC',
+      })
+    })
+  })
+
+  describe('getMarkets', async () => {
+    it('Returns a list of Markets for a given ID', async () => {
+      expect.hasAssertions()
+      const markets = await CMC.getMarkets('bitcoin')
+      for (const market of markets) {
+        expect(market).toBeMarketNoBigNum()
+      }
+    })
+  })
+
+  describe('getMarketsFromTicker', async () => {
+    it('Returns a list of Markets for a given ticker', async () => {
+      expect.hasAssertions()
+      const markets = await CMC.getMarketsFromTicker('BTC')
+      for (const market of markets) {
+        expect(market).toBeMarketNoBigNum()
+      }
+    })
+  })
+
+  describe('global', async () => {
+    it('Returns CoinMarketCap global data', async () => {
+      expect.hasAssertions()
+      const globalData = await CMC.global()
+      expect(globalData).toMatchValidators(GlobalDataValidatorsNoBigNum)
+    })
+  })
 })

@@ -201,8 +201,10 @@ const convertBigNumberToPlain = result => {
   if (!result) {
     return result
   } else if (typeof result === 'array') {
-    return result.map(convertBigNumberToPlain)
   } else if (typeof result === 'object') {
+    if (Array.isArray(result)) {
+      return result.map(convertBigNumberToPlain)
+    }
     return mapObjectValues(
       result,
       val => val instanceof BigNumber ? val.toNumber() : val)
@@ -222,7 +224,28 @@ export default class CoinMarketCap {
           'default': 5*60*1000,
         },
       }),
+      BigNumber=true,
     } = options
+
+    if (!BigNumber) {
+      const CMC_METHODS = [
+        'idFromTicker',
+        'coins',
+        'coin',
+        'coinFromTicker',
+        'coinsFromTicker',
+        'getMarkets',
+        'getMarketsFromTicker',
+        'getLinks',
+        'getLinksFromTicker',
+        'global',
+      ]
+      for (const method of CMC_METHODS) {
+        const orig = this[method]
+        this[method] = (async (...args) =>
+          convertBigNumberToPlain(await orig.call(this, ...args))).bind(this)
+      }
+    }
 
     this.cache = cache
   }
