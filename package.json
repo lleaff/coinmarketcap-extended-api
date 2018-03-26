@@ -1,6 +1,6 @@
 {
   "name": "node-coinmarketcap-extended-api",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "Unofficial CoinMarketCap.com API augmented with website functionality",
   "main": "lib/index.js",
   "files": [
@@ -11,7 +11,8 @@
     "build": "babel client/ -d dist/",
     "build:watch": "babel --watch client/ -d dist/",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "dev": "npm run test:watch"
   },
   "repository": {
     "type": "git",

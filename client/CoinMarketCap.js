@@ -1,8 +1,14 @@
+import fromPairs from 'lodash/fromPairs'
 import { defaultCache } from './cache-default'
 import { withCached } from './cache'
 import { BigNumber } from 'bignumber.js'
-import fromPairs from 'lodash/fromPairs'
-import { groupByKey } from './utils.js'
+import {
+  groupByKey,
+  fetchJson,
+  applyTransforms,
+  mapObjectValues,
+} from './utils'
+import { COINMARKETCAP_URI, COINMARKETCAP_API_URI } from './config'
 
 import request from 'request-promise-native'
 import cheerio from 'cheerio'
@@ -11,6 +17,27 @@ const maybe = fn => val => val === null ? null : fn(val)
 
 const log = (thing, msg, ...msgs) => console.log(msg || '', thing, ...msgs) || thing; //DEBUG
 
+const toBigPercent = per => BigNumber(per).div(100)
+
+/*
+  {
+    id:                'pillar',
+    name:              'Pillar',
+    symbol:            'PLR',
+    rank:              '100',
+    price_usd:         '0.601898', <- max places seen in top 100: 9
+    price_btc:         '0.00006283',
+    24h_volume_usd:    '167863.0',
+    market_cap_usd:    '136862456.0',
+    available_supply:  '227384800.0',
+    total_supply:      '800000000.0',
+    max_supply:         null,
+    percent_change_1h:  '2.69',
+    percent_change_24h: '9.84',
+    percent_change_7d:  '-22.68',
+    last_updated:       '1520824152'
+  }
+*/
 const TICKER_TRANSFORMS = [
   { key: 'id', newKey: 'id', },
   { key: 'name', newKey: 'name', },
@@ -32,40 +59,23 @@ const TICKER_TRANSFORMS = [
   { key: 'max_supply', newKey: 'maxSupply',
     transform: maybe(supply => BigNumber(supply)), },
   { key: 'percent_change_1h', newKey: 'percentChange1h',
-    transform: maybe(per => BigNumber(per)), },
+    transform: maybe(toBigPercent), },
   { key: 'percent_change_24h', newKey: 'percentChange24h',
-    transform: maybe(per => BigNumber(per)), },
+    transform: maybe(toBigPercent), },
   { key: 'percent_change_7d', newKey: 'percentChange7d',
-    transform: maybe(per => BigNumber(per)), },
+    transform: maybe(toBigPercent), },
   { key: 'last_updated', newKey: 'lastUpdated',
     transform: sec => parseInt(sec), },
 ]
-
-const formatAssetData = (raw, transforms) => fromPairs(transforms.map(
-  ({ key, newKey, transform=(a=>a) }) => ([newKey, transform(raw[key])])
-))
 
 const getAssets = withCached({
   group: 'assets',
   getKey: 'all',
   retrieve: async () => {
-    let requestOptions = {
-      uri: `https://api.coinmarketcap.com/v1/ticker/?limit=0`,
-      json: true,
-    }
-    let result
-    try {
-      result = await request(requestOptions)
-      if (!result) {
-        console.error(`[getAssets] Empty response: `, result)
-      }
-    } catch(e) {
-      if (e.name !== 'RequestError') { throw(e) }
-      if (e.cause && e.cause.code === 'ECONNREFUSED') {
-        console.error(`[getAssets]: Couldn't connect. Error:\n`, e)
-      }
-    }
-    const assets = result.map(a => formatAssetData(a, TICKER_TRANSFORMS))
+    const result = await fetchJson(`${COINMARKETCAP_API_URI}/ticker/?limit=0`, {
+      errorPrefix: 'getAssets',
+    })
+    const assets = result.map(a => applyTransforms(a, TICKER_TRANSFORMS))
     const tickers = groupByKey(assets, 'ticker')
     const ids = new Map(assets.map(a => [a.id, a]))
     return {
@@ -75,26 +85,6 @@ const getAssets = withCached({
     }
   }
 })
-
-/*
-{
-  id: 'pillar',
-  name:                 'Pillar',
-  symbol:             'PLR',
-  rank:               '100',
-  price_usd:          '0.601898', <- max places een in top 100: 9
-  price_btc:            '0.00006283',
-  24h_volume_usd:     '167863.0',
-  market_cap_usd:     '136862456.0',
-  available_supply:   '227384800.0',
-  total_supply:       '800000000.0',
-  max_supply:         null,
-  percent_change_1h:  '2.69',
-  percent_change_24h: '9.84',
-  percent_change_7d:  '-22.68',
-  last_updated:       '1520824152'
-}
-*/
 
 const getMarkets = ($) => {
   try {
@@ -115,7 +105,7 @@ const getMarkets = ($) => {
         BigNumber(c.find('span').data('usd'))]
       ,
       ['volumePercent', c =>
-        BigNumber((/([0-9]{0,3}\.[0-9]+)%/.exec(c.text().trim()) || [, c.text().trim()])[1])
+        toBigPercent((/([0-9]{0,3}\.[0-9]+)%/.exec(c.text().trim()) || [, c.text().trim()])[1])
       ],
     ]
 
@@ -156,7 +146,7 @@ const getLinks = ($) => {
   }
 }
 
-const getUrlFromId = id => `https://coinmarketcap.com/currencies/${id}`
+const getUrlFromId = id => `${COINMARKETCAP_URI}/currencies/${id}`
 
 const getAssetPage = withCached({
   group: 'assetpage',
@@ -170,6 +160,57 @@ const getAssetPage = withCached({
   },
 })
 
+
+/*
+  {
+    "total_market_cap_usd": 201241796675,
+    "total_24h_volume_usd": 4548680009,
+    "bitcoin_percentage_of_market_cap": 62.54,
+    "active_currencies": 896,
+    "active_assets": 360,
+    "active_markets": 6439,
+  }
+ */
+
+const GLOBAL_DATA_TRANSFORMS = [
+  { key: 'total_market_cap_usd', newKey: 'totalMarketCapUsd',
+    transform: marketcap => BigNumber(marketcap), },
+  { key: 'total_24h_volume_usd', newKey: 'total24hVolumeUsd',
+    transform: volume => BigNumber(volume), },
+  { key: 'bitcoin_percentage_of_market_cap', newKey: 'bitcoinDominance',
+    transform: toBigPercent, },
+  { key: 'active_currencies', newKey: 'activeCurrencies', },
+  { key: 'active_assets', newKey: 'activeAssets', },
+  { key: 'active_markets', newKey: 'activeMarkets', },
+  { key: 'last_updated', newKey: 'lastUpdated', },
+]
+
+const getGlobalData = withCached({
+  group: 'global',
+  getKey: 'all',
+  retrieve: async () => {
+    const result = await fetchJson(`${COINMARKETCAP_API_URI}/global`)
+    return applyTransforms(result, GLOBAL_DATA_TRANSFORMS)
+  }
+})
+
+const convertBigNumberToPlain = result => {
+  if (result instanceof BigNumber) {
+    return result.toNumber()
+  }
+  if (!result) {
+    return result
+  } else if (typeof result === 'array') {
+    return result.map(convertBigNumberToPlain)
+  } else if (typeof result === 'object') {
+    return mapObjectValues(
+      result,
+      val => val instanceof BigNumber ? val.toNumber() : val)
+  } else {
+    return result
+  }
+}
+
 export default class CoinMarketCap {
   constructor(options={}) {
     const {
@@ -177,9 +218,10 @@ export default class CoinMarketCap {
         expiry: {
           'assets': 5*60*1000,
           'assetspage': 5*60*1000,
+          'global': 10*60*1000,
           'default': 5*60*1000,
         },
-      })
+      }),
     } = options
 
     this.cache = cache
@@ -217,5 +259,9 @@ export default class CoinMarketCap {
 
   getLinksFromTicker = async (ticker) => {
     return await this.getLinks(await this.idFromTicker(ticker))
+  }
+
+  global = async () => {
+    return (await getGlobalData(this.cache))
   }
 }

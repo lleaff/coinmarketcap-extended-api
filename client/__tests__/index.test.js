@@ -5,7 +5,8 @@ import {
   matchValidators,
   AssetValidators,
   MarketValidators,
-  LinkValidator,
+  LinkValidators,
+  globalDataValidators,
 } from './validators'
 
 expect.extend({
@@ -26,7 +27,7 @@ expect.extend({
         pass: false,
       }
     }
-    return matchValidators(received, LinkValidator)
+    return matchValidators(received, LinkValidators)
   }
 })
 
@@ -102,6 +103,12 @@ const apiTests = async (CMC) => {
           expect(coin).toBeAsset()
         }
       })
+
+      it('Returns every active asset', async () => {
+        expect.assertions(1)
+        const [ coins, global ] = await Promise.all([ CMC.coins(), CMC.global() ])
+        expect(global.activeAssets < coins.length).toBe(true)
+      })
     })
 
     describe('coinFromTicker', async () => {
@@ -173,6 +180,14 @@ const apiTests = async (CMC) => {
         }
       })
     })
+
+    describe('global', async () => {
+      it('Returns CoinMarketCap global data', async () => {
+        expect.hasAssertions()
+        const globalData = await CMC.global()
+        expect(globalData).toMatchValidators(globalDataValidators)
+      })
+    })
   })
 }
 
@@ -181,38 +196,57 @@ const cacheTests = async (CMC) => {
   describe('Cache', async () => {
     describe('Retrieve function is not called on a second call with the same arguments', async () => {
       it('.coin', async () => {
-        expect.assertions(3)
+        expect.assertions(5)
         cache.get.mockClear(); cache.set.mockClear(); cache.has.mockClear();
         const coin1 = await CMC.coin('bitcoin')
         const coin2 = await CMC.coin('bitcoin')
         const coin3 = await CMC.coin('bitcoin')
+        expect(coin1).toEqual(coin2)
+        expect(coin1).toEqual(coin3)
         expect(cache.has).toHaveBeenCalledTimes(3)
         expect(cache.set).toHaveBeenCalledTimes(1)
         expect(cache.get).toHaveBeenCalledTimes(2)
       })
 
       it('.getMarkets', async () => {
-        expect.assertions(3)
+        expect.assertions(5)
         cache.get.mockClear(); cache.set.mockClear(); cache.has.mockClear();
         const markets1 = await CMC.getMarkets('bitcoin')
         const markets2 = await CMC.getMarkets('bitcoin')
         const markets3 = await CMC.getMarkets('bitcoin')
+        expect(markets1).toEqual(markets2)
+        expect(markets1).toEqual(markets3)
         expect(cache.has).toHaveBeenCalledTimes(3)
         expect(cache.set).toHaveBeenCalledTimes(1)
         expect(cache.get).toHaveBeenCalledTimes(2)
       })
 
       it('.getLinks', async () => {
-        expect.assertions(3)
+        expect.assertions(5)
         cache.get.mockClear(); cache.set.mockClear(); cache.has.mockClear();
         const links1 = await CMC.getLinks('bitcoin')
         const links2 = await CMC.getLinks('bitcoin')
         const links3 = await CMC.getLinks('bitcoin')
+        expect(links1).toEqual(links2)
+        expect(links1).toEqual(links3)
         // We have the asset page data from .getMarkets test, so no fetching
         // should occur here.
         expect(cache.has).toHaveBeenCalledTimes(3)
         expect(cache.set).toHaveBeenCalledTimes(0)
         expect(cache.get).toHaveBeenCalledTimes(3)
+      })
+
+      it('.global', async () => {
+        expect.assertions(5)
+        cache.get.mockClear(); cache.set.mockClear(); cache.has.mockClear();
+        const global1 = await CMC.global()
+        const global2 = await CMC.global()
+        const global3 = await CMC.global()
+        expect(global1).toEqual(global2)
+        expect(global1).toEqual(global3)
+        expect(cache.has).toHaveBeenCalledTimes(3)
+        expect(cache.set).toHaveBeenCalledTimes(1)
+        expect(cache.get).toHaveBeenCalledTimes(2)
       })
     })
   })

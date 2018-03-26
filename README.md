@@ -5,6 +5,8 @@ Node.js client for accessing [CoinMarketCap](https://coinmarketcap.com/) data.
 Uses a local cache to avoid re-fetching coin info too frequently.
 The cache can be configured or overriden with a custom implementation.
 
+This library outputs most numbers as [bignumber.js](https://github.com/MikeMcl/bignumber.js) instances by default. This can be deactivated.
+
 This module cannot be used in browsers due to CSP restrictions.
 
 ## Installation
@@ -21,7 +23,7 @@ const CMC = new CoinMarketCap()
 
 CMC.getMarketsFromTicker('ETH')
   .then(markets => {
-    for (const market of markets) {
+    for (const market of marketfs) {
       console.log(`ETH trades at ${market.priceUsd} USD on ${market.exchange}.`)
     }
   })
@@ -35,6 +37,7 @@ CMC.getMarketsFromTicker('ETH')
   * `options`: Object with any of the below properties:  
     * `cache`: Can be used to override the default in-JS heap cache.  
                Must be an object with `has`, `get` and `set` methods.  
+    * `BigNumber` default `true`: If set to false, returned numbers will be plain JavaScript `Number` instances.  
 
 ### Instance methods:
 
@@ -47,6 +50,15 @@ CMC.getMarketsFromTicker('ETH')
 * `async` **`getMarketsFromTicker`**`(ticker)`: `[Market]`  
 * `async` **`getLinks`**`(id)`: `[Link]`  
 * `async` **`getLinksFromTicker`**`(ticker)`: `[Link]`  
+* `async` **`global`**`()`: `GlobalData`  
+    `GlobalData`:
+    * **`totalMarketCapUsd:`**: `BigNumber` (USD)
+    * **`total24hVolumeUsd:`**: `BigNumber` (USD)
+    * **`bitcoinDominance:`**: `BigNumber` (%)
+    * **`activeCurrencies:`**: `int`
+    * **`activeAssets`**: `int`
+    * **`activeMarkets`**: `int`
+    * **`lastUpdated`**: `int` (seconds): UNIX time.
 
 ### Instance properties:
 
@@ -73,9 +85,9 @@ CMC.getMarketsFromTicker('ETH')
   * **`availableSupply`**: `BigNumber?` (tokens)
   * **`totalSupply`**: `BigNumber?` (tokens)
   * **`maxSupply`**: `BigNumber?` (tokens)
-  * **`percentChange1h`**: `BigNumber?`
-  * **`percentChange24h`**: `BigNumber?`
-  * **`percentChange7d`**: `BigNumber?`
+  * **`percentChange1h`**: `BigNumber?` (%)
+  * **`percentChange24h`**: `BigNumber?` (%)
+  * **`percentChange7d`**: `BigNumber?` (%)
   * **`lastUpdated`**: `int` (seconds): UNIX time.
 
 * **`Market`**: Information related to a particular trading pair.
@@ -154,6 +166,7 @@ Cache keys follow a `<group>:<key>` format.
 
 * **`assets:all`**: Used with `idFromTicker`, `coins`, `coin`, `coinFromTicker`, `coinsFromTicker`.
 * **`assetpage:<id>`**: Used with `getMarkets`, `getMarketsFromTicker`, `getLinks`, `getLinksFromTicker`.
+* **`global:all`**: Used with `global`.
 
 
 ## Development
