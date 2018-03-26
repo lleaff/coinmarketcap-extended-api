@@ -141,7 +141,7 @@ const CMC = new CoinMarketCap({
   * `options`: Object with any of the below properties:  
     * **`init`**: `[[key: string, value: any]]` Store's initial content, argument to Map consructor.
     * **`expiry`**: `int|{group: string: int}` _(default `300000` ie. 5 minutes)_ Time in milliseconds before a cache entry is considered stale.  
-      Can be indicated as a number for every entry, or an object with different durations for each group.
+      Can be indicated as a number for every entry, or an object with [different durations for each group](#cache-keys).
       The object keys are groups and the values the corresponding expiry time. The object should have a `default` key.
 
 ##### Instance methods:

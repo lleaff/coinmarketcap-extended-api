@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js'
 import request from 'request-promise-native'
 import fromPairs from 'lodash/fromPairs'
 
@@ -49,3 +50,5 @@ export const applyTransforms = (raw, transforms) => fromPairs(transforms.map(
 export const mapObjectValues = (obj, transform) => fromPairs(
   Object.entries(obj).map(([key, val]) => [key, transform(val)])
 )
+
+export const toBigPercent = per => BigNumber(per).div(100)
